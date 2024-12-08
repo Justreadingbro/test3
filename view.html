@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viewer Location</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
+    <script>
+        let map;
+
+        // Initialize Google Map
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 0, lng: 0 },
+                zoom: 2,
+            });
+
+            // Periodically fetch the latest location of the user
+            setInterval(fetchLocation, 5000);
+        }
+
+        // Fetch the user's location (from ESP32) and update the map
+        function fetchLocation() {
+            fetch('http://192.168.3.188/location') // ESP32 will provide the user's location
+            .then(response => response.json())
+            .then(data => {
+                const userLocation = { lat: parseFloat(data.latitude), lng: parseFloat(data.longitude) };
+
+                // Update map position
+                map.setCenter(userLocation);
+
+                // Place a marker on the map
+                new google.maps.Marker({
+                    position: userLocation,
+                    map: map,
+                    title: "User's Location",
+                });
+            })
+            .catch(error => console.error('Error fetching location:', error));
+        }
+    </script>
+</head>
+<body>
+    <h1>Current Location of User</h1>
+    <div id="map" style="height: 500px; width: 100%;"></div>
+</body>
+</html>
